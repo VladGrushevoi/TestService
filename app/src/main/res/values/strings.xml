@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">TestServise</string>
     <string name="button">Start</string>
+    <string name="enter_music_url">Enter music url</string>
+    <string name="stop">Stop</string>
+    <string name="clear_url">Clear URL</string>
+    <string name="file_not_found">MP3 not found :(</string>
 </resources>
