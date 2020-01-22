@@ -36,7 +36,7 @@
         android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="@string/enter_music_url"
-
+        android:text="@string/url"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button_start"
@@ -61,8 +61,6 @@
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:thumbTint="#06A7A7"
-        android:progressTint="#44B7E4"
         app:layout_constraintVertical_bias="1"
         android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"

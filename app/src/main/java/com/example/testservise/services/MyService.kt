@@ -7,15 +7,18 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
 import com.example.testservise.R
 import com.example.testservise.extentions.setStreamingAttributes
 import com.example.testservise.ui.MainActivity.Companion.CHANNEL_ID
 import com.example.testservise.ui.MainActivity.Companion.URL
 import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 
 class MyService : Service() {
     val mediaPlayer by lazy { MediaPlayer() }
     private lateinit var notification: Notification
+    private val audioDuration = MutableLiveData<Long>()
 
     override fun onCreate() {
         super.onCreate()
@@ -34,7 +37,7 @@ class MyService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
-        runBlocking {
+        GlobalScope.launch {
             prepareMediaPlayer(intent)
             startForeground(1, notification)
         }
@@ -56,8 +59,14 @@ class MyService : Service() {
             isLooping = true
             prepare()
             start()
+
+            withContext(Dispatchers.Main) {
+                audioDuration.value = TimeUnit.MILLISECONDS.toSeconds(duration.toLong())
+            }
         }
     }
+
+    fun getDuration() = audioDuration
 
     inner class LocalBinder : Binder() {
         fun getService() = this@MyService

@@ -5,4 +5,6 @@
     <string name="stop">Stop</string>
     <string name="clear_url">Clear URL</string>
     <string name="file_not_found">MP3 not found :(</string>
+    <string name="url">https://cdns-preview-d.dzcdn.net/stream/c-deda7fa9316d9e9e880d2c6207e92260-5.mp3</string>
+    <string name="track_image">track image</string>
 </resources>

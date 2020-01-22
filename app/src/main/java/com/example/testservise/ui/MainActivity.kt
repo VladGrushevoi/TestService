@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import com.example.testservise.R
 import com.example.testservise.services.MyService
 import com.example.testservise.services.MyService.LocalBinder
@@ -15,8 +17,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Runnable
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity() {
-    private var myService: MyService = MyService()
+open class MainActivity : AppCompatActivity() {
+    private lateinit var  myService: MyService
     private lateinit var runnable: Runnable
     private var handler: Handler = Handler()
 
@@ -31,7 +33,6 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(URL, editText.text.toString())
             bindService(intent, connection)
             ContextCompat.startForegroundService(this, intent)
-            initializeSeekBar()
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -71,15 +72,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun serviceConnection() = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            myService = (service as LocalBinder).getService()
+            val binder = service as LocalBinder
+            myService = binder.getService()
+            myService.getDuration().observe(this@MainActivity, Observer {
+                initializeSeekBar(it)
+            })
         }
 
-        override fun onServiceDisconnected(className: ComponentName) {
-        }
+        override fun onServiceDisconnected(className: ComponentName) {}
     }
 
-    private fun initializeSeekBar() {
-        seekBar.max = 30
+    private fun initializeSeekBar(duration: Long) {
+        this.toast(duration)
+
+        seekBar.max = duration.toInt()
+
         runnable = Runnable {
             seekBar.progress =
                 TimeUnit.MILLISECONDS.toSeconds(myService.mediaPlayer.currentPosition.toLong())
@@ -95,4 +102,8 @@ class MainActivity : AppCompatActivity() {
         const val CHANNEL_ID = "main_activity"
         const val URL = "url_key"
     }
+}
+
+private fun MainActivity.toast(obj: Any) {
+    Toast.makeText(this, obj.toString(), Toast.LENGTH_SHORT).show()
 }
