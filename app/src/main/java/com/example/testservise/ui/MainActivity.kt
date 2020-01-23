@@ -12,25 +12,29 @@ import androidx.lifecycle.Observer
 import com.example.testservise.R
 import com.example.testservise.services.MyService
 import com.example.testservise.services.MyService.LocalBinder
-import com.example.testservise.utils.NotificationChanelProvider
+import com.example.testservise.utils.NotificationHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.IllegalArgumentException
 import java.lang.Runnable
 import java.util.concurrent.TimeUnit
 
 open class MainActivity : AppCompatActivity() {
-    private lateinit var  myService: MyService
+    private lateinit var myService: MyService
     private lateinit var runnable: Runnable
     private var handler: Handler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        NotificationChanelProvider.createNotificationChannel(this, NOTIFICATION)
+
         val intent = Intent(this, MyService().javaClass)
         val connection = serviceConnection()
 
         button_start.setOnClickListener {
-            intent.putExtra(URL, editText.text.toString())
+            intent.apply {
+                putExtra(URL, editText.text.toString())
+                putExtra(IS_LOOPING, false)
+            }
             bindService(intent, connection)
             ContextCompat.startForegroundService(this, intent)
         }
@@ -50,8 +54,12 @@ open class MainActivity : AppCompatActivity() {
         })
 
         button_stop.setOnClickListener {
-            stopService(intent)
-            unbindService(connection)
+            try {
+                stopService(intent)
+                unbindService(connection)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
         }
 
         button_clear.setOnClickListener {
@@ -59,15 +67,8 @@ open class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun bindService(
-        intent: Intent,
-        connection: ServiceConnection
-    ) {
-        bindService(
-            intent,
-            connection,
-            Context.BIND_AUTO_CREATE
-        )
+    private fun bindService(intent: Intent, connection: ServiceConnection) {
+        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun serviceConnection() = object : ServiceConnection {
@@ -83,8 +84,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeSeekBar(duration: Long) {
-        this.toast(duration)
-
         seekBar.max = duration.toInt()
 
         runnable = Runnable {
@@ -98,12 +97,8 @@ open class MainActivity : AppCompatActivity() {
 
     companion object {
         const val DELAY = 1000
-        const val NOTIFICATION = "play_notification"
         const val CHANNEL_ID = "main_activity"
         const val URL = "url_key"
+        const val IS_LOOPING = "is_looping_key"
     }
-}
-
-private fun MainActivity.toast(obj: Any) {
-    Toast.makeText(this, obj.toString(), Toast.LENGTH_SHORT).show()
 }
